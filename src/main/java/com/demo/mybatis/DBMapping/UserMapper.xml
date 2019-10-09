@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.mybatis.DBMapping.UserMapper">
+	<!-- <cache type="com.demo.model.CusCache"/> -->
+    <select id="getUserList" resultType="User" useCache="false">
+        select * from employee
+    </select> 
+    <insert id="addUser" parameterType="user" flushCache="false">
+      <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+          SELECT LAST_INSERT_ID()
+      </selectKey>
+        insert into t_user(name,age,money,status) values (#{name},#{age},#{money},#{status,typeHandler=com.demo.model.CusEnumStatusHandler})
+    </insert>
+    <select id="getUser" parameterType="int" 
+        resultMap="userResult">
+        select * from t_user where id=#{id}
+    </select>
+     <select id="getUserList1" resultType="User">
+	  select 
+	   <include refid="userColumns"></include>
+	   from t_user
+    </select>
+    <sql id="userColumns"> ${alias}.id,${alias}.name,${alias}.age,${alias}.money,${alias}.status </sql>
+    <sql id="sometable">
+	  ${prefix}user as ${alias}
+	</sql>
+	<sql id="someinclude">
+	  from
+	    <include refid="${include_target}"/>
+	</sql>
+	<select id="getUserList2" resultMap="userResult">
+	  select
+	  <include refid="userColumns"><property name="alias" value="t1"/></include>
+	  <include refid="someinclude">
+	    <property name="prefix" value="t_"/>
+	    <property name="alias" value="t1"/>
+	    <property name="include_target" value="sometable"/>
+	  </include>
+	</select>
+    <resultMap type="user" id="userResult">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="age" property="age"/>
+        <result column="money" property="money"/>
+        <result column="status" property="status" jdbcType="VARCHAR" javaType="com.demo.model.UserState" typeHandler="com.demo.model.CusEnumStatusHandler"/>
+    </resultMap>
+    <select id="getuser" parameterType="int" 
+         resultMap="userResultTest2">
+        select a.id as user_id,a.name as user_name,a.age as user_age,a.money as user_money,a.status as user_status,b.id as card_id,b.cardNo as card_cardNo,b.userid as card_userid,
+        b.city as card_city,b.address as card_address,c.id as course_id,c.name as course_name,c.userid as course_userid,e.name as role_name,e.desp as role_desp 
+        from t_user a left join card b on a.id=b.userid left join course c on a.id=c.userid left join user_role d on a.id=d.userid left join role e on d.roleid=e.id
+        where a.id=#{id}
+    </select>
+    <resultMap type="User" id="userResultTest">
+        <result column="user_id" property="id"/>
+        <result column="user_name" property="name"/>
+        <result column="user_age" property="age"/>
+        <result column="user_money" property="money"/>
+        <result column="user_status" property="status" typeHandler="com.demo.model.CusEnumStatusHandler"/>
+        <association property="card" javaType="Card" columnPrefix="card_">
+            <result column="id" property="id"/>
+            <result column="no" property="cardNo"/>
+            <result column="city" property="city"/>
+            <result column="address" property="address"/>
+            <result column="userid" property="userid"/>
+        </association>
+        <collection property="courses" javaType="ArrayList" ofType="Course" columnPrefix="course_">
+            <result column="id" property="id"/>
+            <result column="name" property="name"/>
+            <result column="userid" property="userid"/>
+        </collection>
+        <collection property="roles" javaType="ArrayList" ofType="Role" columnPrefix="role_">
+            <result column="id" property="id"/>
+            <result column="name" property="name"/>
+            <result column="desp" property="desp"/>
+            <result column="userid" property="userid"/>
+        </collection>
+    </resultMap>
+    <resultMap type="Card" id="cardResult">
+        <result column="id" property="id"/>
+        <result column="no" property="cardNo"/>
+        <result column="city" property="city"/>
+        <result column="address" property="address"/>
+        <result column="userid" property="userid"/>
+    </resultMap>
+
+    <resultMap type="Course" id="courseResult">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="userid" property="userid"/>
+    </resultMap>
+    <resultMap type="Role" id="roleResult">
+        <result column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="desp" property="desp"/>
+        <result column="userid" property="userid"/>
+    </resultMap>
+    <resultMap type="User" id="userResultTest1">
+        <id column="user_id" property="id"/>
+        <result column="user_name" property="name"/>
+        <result column="user_age" property="age"/>
+        <result column="user_money" property="money"/>
+        <result column="user_status" property="status" typeHandler="com.demo.model.CusEnumStatusHandler"/>
+        <association property="card" javaType="Card" resultMap="cardResult" columnPrefix="card_"></association>
+        <collection property="courses" javaType="ArrayList" ofType="Course" resultMap="courseResult" columnPrefix="course_"></collection>
+        <collection property="roles" javaType="ArrayList" ofType="Role" resultMap="roleResult" columnPrefix="role_"></collection>
+    </resultMap>
+    <resultMap type="user" id="userResultTest2">
+        <id column="user_id" property="id"/>
+        <result column="user_name" property="name"/>
+        <result column="user_status" property="status" typeHandler="com.demo.model.CusEnumStatusHandler"/>
+        <association property="card" javaType="Card" resultMap="cardResult" columnPrefix="card_"></association>
+        <collection property="courses" javaType="ArrayList" ofType="Course" resultMap="courseResult" columnPrefix="course_"></collection>
+        <collection property="roles" javaType="ArrayList" ofType="Role" resultMap="roleResult" columnPrefix="role_"></collection>
+        <discriminator javaType="string" column="user_status">
+        	<case value="0" resultType="User">
+        		<result column="user_age" property="age"/>
+        	</case>
+        	<case value="1" resultType="User">
+        		 <result column="user_money" property="money"/>
+        	</case>
+        </discriminator>
+    </resultMap>
+    <!-- <cache eviction="LRU" flushInterval="100000" size="1024" readOnly="true"/> -->
+    <select id="finduserbylikename1"  parameterType="string"  resultMap="userResult">
+       select * from t_user where 1=1
+       <if test="_parameter!=null and  _parameter!=''">
+               and name like #{_parameter}
+       </if>
+    </select>
+    <select id="finduserbylikename2"  parameterType="map"  resultMap="userResult">
+     <bind name="pattern" value="'%' + _parameter.name + '%'" />
+       select * from t_user where 1=1
+       <if test="_parameter.name!=null and  _parameter.name!=''">
+               and name like #{pattern}
+       </if>
+    </select>
+    <select id="findcard"  parameterType="map"  resultMap="cardResult">
+     <bind name="pattern" value="'%' + _parameter.value + '%'" />
+       select * from card where 1=1
+          <choose>
+                <when test="type=='city'">
+                  AND city like #{pattern}
+                </when>
+                <when test="type=='address'">
+                  AND address like #{pattern}
+                </when>
+                <otherwise>
+                  AND city like #{pattern} or address like #{pattern}
+                </otherwise>
+          </choose>
+    </select>
+    <update id="updatecard" parameterType="map">
+     update card 
+     <trim prefix="set" suffixOverrides=",">
+             <if test="_parameter.cardNo!=null and _parameter.cardNo!=''">
+                    cardNo = #{cardNo},
+           </if>
+           <if test=" _parameter.city!=null and _parameter.city!=''">
+                    city = #{city},
+           </if>
+     </trim>
+     <trim prefix="WHERE" prefixOverrides="and|or">
+            <if test=" _parameter.id!=null and _parameter.id!=''">
+                   and id = #{id}
+           </if>
+           <if test=" _parameter.address!=null and _parameter.address!=''">
+                   and address = #{address}
+           </if>
+     </trim>
+    </update>
+    <select id="findcardbyuserids" parameterType="map" resultMap="userResult">
+        select * from t_user where id in 
+        <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+    
+</mapper>
