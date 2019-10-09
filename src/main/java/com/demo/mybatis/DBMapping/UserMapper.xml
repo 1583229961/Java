@@ -2,8 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.demo.mybatis.DBMapping.UserMapper">
 	<!-- <cache type="com.demo.model.CusCache"/> -->
-    <select id="getUserList" resultType="User" useCache="false">
-        select * from employee
+    <select id="getUserList" resultType="Id" useCache="false">
+        select id from employee
     </select> 
     <insert id="addUser" parameterType="user" flushCache="false">
       <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
