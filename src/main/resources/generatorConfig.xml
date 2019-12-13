@@ -10,7 +10,7 @@
 	        <property name="suppressAllComments" value="true"/>
 	    </commentGenerator>
 	    <!--数据库驱动，数据库地址及表名，账号，密码-->
-	    <jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://127.0.0.1:3306/daodemodb"    userId="root" password="123456">
+	    <jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://127.0.0.1:3306/daodemodb"    userId="root" password="Apple123">
 	    </jdbcConnection>
 	    <javaTypeResolver>
 	        <property name="forceBigDecimals" value="false"/>
